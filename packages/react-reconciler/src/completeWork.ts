@@ -1,0 +1,3 @@
+const completeWork = (): void => {
+	//ccc
+};
