@@ -33,7 +33,7 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 		return fiber;
 	}
 
-	return function reconcilerChildFibers(
+	return function reconcileChildFibers(
 		returnFiber: FiberNode, // wip fiberNode
 		currentFiber: FiberNode | null, //wip.child fiberNode
 		newChild?: ReactElementType //wip对应的child的reactElement
@@ -50,11 +50,14 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 					}
 			}
 		}
+		// HostText
 		if (typeof newChild === 'string' || typeof newChild === 'number') {
 			return placeSingleChild(
 				reconilerSingleTextNode(returnFiber, currentFiber, newChild)
 			);
 		}
+
+		// TODO 多节点的情况 ul> li*3
 
 		if (__DEV__) {
 			console.warn('未实现的 reconciler类型 ', newChild);

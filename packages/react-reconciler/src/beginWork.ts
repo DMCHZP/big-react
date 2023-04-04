@@ -1,7 +1,12 @@
 import { ReactElementType } from 'shared/ReactTypes';
 import { FiberNode } from './fiber';
 import { UpdateQueue, processUpdateQueue } from './updateQueue';
-import { FunctionComponent, HostRoot, HostText } from './workTags';
+import {
+	FunctionComponent,
+	HostRoot,
+	HostText,
+	HostComponent
+} from './workTags';
 import { mountChildFiber, reconcilerChildFiber } from './childFibers';
 
 //递归中的递阶段
@@ -10,16 +15,18 @@ export const beginWork = (wip: FiberNode) => {
 	switch (wip.tag) {
 		case HostRoot:
 			//1. 对于 根结点的fiberNode 要做两件事 1. 计算状态的最新值 2.创造子fiberNode
-			return;
-		case FunctionComponent:
-			return;
+			return updateHostRoot(wip);
+		case HostComponent:
+			//1.创造子fiberNode
+			return updateHostComponent(wip);
 		case HostText:
-			return;
+			return null;
 		default:
 			if (__DEV__) {
 				console.warn('beginWork 未实现类型');
 			}
 	}
+	return null;
 };
 
 function updateHostRoot(wip: FiberNode) {
@@ -31,6 +38,8 @@ function updateHostRoot(wip: FiberNode) {
 
 	//就我们的应用是<div id="app"><App/></div>，hostRootFiber对应的是div，他的子元素对应的是App，但是App这个ReactElement被传给hostRootFiber作为memoizedState，hostRootFiber根据这个memoizedState来生成子FiberNode
 	const { memoizedState } = processUpdateQueue(baseState, pending);
+	wip.memoizedState = memoizedState;
+	//这里 memoizedState 是一个 reactElement
 	const nextChildren = wip.memoizedState;
 	reconcileChildren(wip, nextChildren);
 	return wip.child;

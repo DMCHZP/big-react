@@ -1,11 +1,11 @@
 import { Props, Key, ReactElementType } from 'shared/ReactTypes';
-import { FunctionComponent, WorkTags } from './workTags';
+import { FunctionComponent, HostComponent, WorkTag } from './workTags';
 import { Flags, NoFlags } from './fiberFlags';
 import { Container } from 'hostConfig';
 
 export class FiberNode {
 	type: any;
-	tag: WorkTags;
+	tag: WorkTag;
 	key: Key;
 	stateNode: any;
 	pendingProps: Props;
@@ -16,10 +16,11 @@ export class FiberNode {
 	ref: any;
 	alternate: FiberNode | null;
 	flags: Flags;
+	subtreeFlags: Flags;
 	memoizedProps: Props;
 	memoizedState: any;
 	updateQueue: any;
-	constructor(tag: WorkTags, pendingProps: Props, key: Key) {
+	constructor(tag: WorkTag, pendingProps: Props, key: Key) {
 		this.tag = tag;
 		this.key = key;
 		//真实dom结构
@@ -39,13 +40,15 @@ export class FiberNode {
 		this.ref = null;
 
 		//作为工作单元
-		this.pendingProps = null;
+		this.pendingProps = pendingProps;
 		this.memoizedProps = null;
 		this.memoizedState = null;
 		this.updateQueue = null;
 
 		this.alternate = null;
+		//副作用
 		this.flags = NoFlags;
+		this.subtreeFlags = NoFlags;
 	}
 }
 
@@ -70,17 +73,18 @@ export const createWorkInProgress = (
 ) => {
 	// 获取fiber的缓存fiber
 	let wip = current.alternate;
-	//如果为空 就是 mount 阶段
 	if (wip === null) {
+		//如果为空 就是 mount 阶段
 		wip = new FiberNode(current.tag, pendingProps, current.key);
-		wip.type = current.type;
 		wip.stateNode = current.stateNode;
 
 		wip.alternate = current;
+		current.alternate = wip;
 	} else {
 		//不为空就是 update 阶段
 		wip.pendingProps = pendingProps;
 		wip.flags = NoFlags;
+		wip.subtreeFlags = NoFlags;
 	}
 
 	wip.type = current.type;
@@ -94,9 +98,10 @@ export const createWorkInProgress = (
 
 export function createFiberFromElement(element: ReactElementType): FiberNode {
 	const { type, key, props } = element;
-	const fiberTag: WorkTags = FunctionComponent;
+	let fiberTag: WorkTag = FunctionComponent;
 	if (typeof type === 'string') {
 		//<div/> type:'div'
+		fiberTag = HostComponent;
 	} else if (typeof type !== 'function' && __DEV__) {
 		console.warn('未定义的type类型');
 	}

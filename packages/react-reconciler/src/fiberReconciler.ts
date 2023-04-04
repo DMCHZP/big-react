@@ -10,7 +10,7 @@ import {
 import { ReactElementType } from 'shared/ReactTypes';
 import { scheduleUpdateOnFiber } from './workLoop';
 
-export function createContainer(container: Container) {
+export function createContainer(container: Container): FiberRootNode {
 	/*
 	 * 创建根节点的fiberNode 叫做 hostRootFiber，hostRootFiber的stateNode也就是他的原生dom 指向 fiberRootNode
 	 *
@@ -21,6 +21,7 @@ export function createContainer(container: Container) {
 
 	// 创建更新队列
 	hostRootFiber.updateQueue = createUpdateQueue();
+	return fiberRootNode;
 }
 
 export function updateContainer(
