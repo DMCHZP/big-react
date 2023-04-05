@@ -61,7 +61,7 @@ function commitRoot(root: FiberRootNode) {
 	}
 
 	if (__DEV__) {
-		console.log('commit 阶段开始', finishedWork);
+		console.warn('commit 阶段开始', finishedWork);
 	}
 
 	root.finishWorked = null;
@@ -112,7 +112,9 @@ function workLoop() {
 
 function performanceUnitOfWork(fiber: FiberNode) {
 	//beginWork 会根据当前 fiberNode 创建出他第一个child的fiberNode ，next 是当前fiberNode的子fiberNode
-
+	if (__DEV__) {
+		console.warn('beginWork fiber.type:', fiber.type, fiber);
+	}
 	const next = beginWork(fiber);
 	//这里fiber 完成后，所有pendingProps已经准备好，就可以赋值给memoizedProps
 	fiber.memoizedProps = fiber.pendingProps;
@@ -127,6 +129,9 @@ function performanceUnitOfWork(fiber: FiberNode) {
 function completeUnitOfWork(fiber: FiberNode) {
 	let node: FiberNode | null = fiber;
 	do {
+		if (__DEV__) {
+			console.warn('completeWork fiber.type:', node.type, node);
+		}
 		completeWork(node);
 		const sibling = node.sibling;
 		if (sibling !== null) {

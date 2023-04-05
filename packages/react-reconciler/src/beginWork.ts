@@ -8,6 +8,7 @@ import {
 	HostComponent
 } from './workTags';
 import { mountChildFiber, reconcilerChildFiber } from './childFibers';
+import { renderWithHooks } from './fiberHooks';
 
 //递归中的递阶段
 export const beginWork = (wip: FiberNode) => {
@@ -21,6 +22,8 @@ export const beginWork = (wip: FiberNode) => {
 			return updateHostComponent(wip);
 		case HostText:
 			return null;
+		case FunctionComponent:
+			return updateFunctionComponent(wip);
 		default:
 			if (__DEV__) {
 				console.warn('beginWork 未实现类型');
@@ -28,6 +31,12 @@ export const beginWork = (wip: FiberNode) => {
 	}
 	return null;
 };
+
+function updateFunctionComponent(wip: FiberNode) {
+	const nextChildren = renderWithHooks(wip);
+	reconcileChildren(wip, nextChildren);
+	return wip.child;
+}
 
 function updateHostRoot(wip: FiberNode) {
 	const baseState = wip.memoizedState;
