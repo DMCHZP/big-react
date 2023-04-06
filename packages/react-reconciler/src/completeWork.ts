@@ -11,7 +11,7 @@ import {
 	HostRoot,
 	HostText
 } from './workTags';
-import { NoFlags } from './fiberFlags';
+import { NoFlags, Update } from './fiberFlags';
 
 export const completeWork = (wip: FiberNode) => {
 	//ccc
@@ -35,6 +35,11 @@ export const completeWork = (wip: FiberNode) => {
 		case HostText:
 			if (current != null && wip.stateNode) {
 				//如果 存在缓存 fiberNode 并且存在 stateNode 也就是真实dom节点，就是更新阶段
+				const oldText = current.memoizedProps.content;
+				const nextText = nextProps.content;
+				if (oldText != nextText) {
+					markUpdate(wip);
+				}
 			} else {
 				//1. 构建DOM
 				const instance = createTextInstance(nextProps.content);
@@ -54,6 +59,10 @@ export const completeWork = (wip: FiberNode) => {
 			}
 	}
 };
+
+function markUpdate(fiber: FiberNode) {
+	fiber.flags |= Update;
+}
 
 // function A(){
 // 	return <div></div>

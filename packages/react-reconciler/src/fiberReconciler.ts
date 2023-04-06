@@ -17,15 +17,15 @@ export function createContainer(container: Container): FiberRootNode {
 	 */
 
 	const hostRootFiber = new FiberNode(HostRoot, {}, null);
-	const fiberRootNode = new FiberRootNode(container, hostRootFiber);
+	const root = new FiberRootNode(container, hostRootFiber);
 
 	// 创建更新队列
 	hostRootFiber.updateQueue = createUpdateQueue();
-	return fiberRootNode;
+	return root;
 }
 
 export function updateContainer(
-	element: ReactElementType,
+	element: ReactElementType | null,
 	root: FiberRootNode
 ) {
 	const hostRootFiber = root.current;

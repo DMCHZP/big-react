@@ -8,7 +8,9 @@ import {
 	ElementType
 } from 'shared/ReactTypes';
 
-export const ReactElement = function (
+// ReactElement
+
+const ReactElement = function (
 	type: Type,
 	key: Key,
 	ref: Ref,
@@ -22,9 +24,16 @@ export const ReactElement = function (
 		props,
 		__mark: 'hzp'
 	};
-
 	return element;
 };
+
+export function isValidElement(object: any) {
+	return (
+		typeof object === 'object' &&
+		object !== null &&
+		object.$$typeof === REACT_ELEMENT_TYPE
+	);
+}
 
 export const jsx = (type: ElementType, config: any, ...maybeChildren: any) => {
 	let key: Key = null;
@@ -34,13 +43,13 @@ export const jsx = (type: ElementType, config: any, ...maybeChildren: any) => {
 	for (const prop in config) {
 		const val = config[prop];
 		if (prop === 'key') {
-			if (!val === undefined) {
+			if (val !== undefined) {
 				key = '' + val;
 			}
 			continue;
 		}
 		if (prop === 'ref') {
-			if (!val === undefined) {
+			if (val !== undefined) {
 				ref = val;
 			}
 			continue;
@@ -49,7 +58,6 @@ export const jsx = (type: ElementType, config: any, ...maybeChildren: any) => {
 			props[prop] = val;
 		}
 	}
-
 	const maybeChildrenLength = maybeChildren.length;
 	if (maybeChildrenLength) {
 		if (maybeChildrenLength === 1) {
@@ -58,8 +66,7 @@ export const jsx = (type: ElementType, config: any, ...maybeChildren: any) => {
 			props.children = maybeChildren;
 		}
 	}
-
-	return ReactElement(key, type, ref, props);
+	return ReactElement(type, key, ref, props);
 };
 
 export const jsxDEV = (type: ElementType, config: any) => {
