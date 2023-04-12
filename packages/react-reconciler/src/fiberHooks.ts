@@ -75,6 +75,7 @@ function updateState<State>(): [State, Dispatch<State>] {
 		hook.memoizeState = memoizedState;
 	}
 
+	//queue.dispatch 还是之前mountState 创建的 dispatch
 	return [hook.memoizeState, queue.dispatch as Dispatch<State>];
 }
 

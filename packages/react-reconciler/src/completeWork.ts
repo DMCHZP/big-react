@@ -12,6 +12,7 @@ import {
 	HostText
 } from './workTags';
 import { NoFlags, Update } from './fiberFlags';
+import { updateFiberProps } from 'react-dom/src/SyntheticEvent';
 
 export const completeWork = (wip: FiberNode) => {
 	//ccc
@@ -21,11 +22,15 @@ export const completeWork = (wip: FiberNode) => {
 	switch (wip.tag) {
 		case HostComponent:
 			if (current != null && wip.stateNode) {
+				//update
 				//如果 存在缓存 fiberNode 并且存在 stateNode 也就是真实dom节点，就是更新阶段
+				//1. props 是否变化
+				//2. Update flag
+				updateFiberProps(wip.stateNode, nextProps);
 			} else {
 				//1. 构建DOM （创建当前fiberNode 对应的真实dom）
 				//const instance = createInstance(wip.type, nextProps);
-				const instance = createInstance(wip.type);
+				const instance = createInstance(wip.type, nextProps);
 				//2. 将Dom插入到Dom树 （递归遍历找到当前fiberNode下所有 对应有 HostComponent 的节点（包括子节点和兄弟节点），并且append到上面 instance dom中 ）
 				appendAllChildren(instance, wip);
 				wip.stateNode = instance;
