@@ -1,7 +1,9 @@
 import {
 	Container,
+	Instance,
 	appendChildToContainer,
 	commitUpdate,
+	insertChildToContainer,
 	removeChild
 } from 'hostConfig';
 import { FiberNode, FiberRootNode } from './fiber';
@@ -137,21 +139,58 @@ function commitNestedComponent(
 	}
 }
 
-//提交插入操作的effecct
+//提交  插入/移动  操作的effecct
 const commitPlacement = (finishedWork: FiberNode) => {
-	//parent Dom
-
 	if (__DEV__) {
 		console.warn('执行Placement操作', finishedWork);
 	}
 	//获取当前fiber HostParent ：比如当前fiber是 <A/> :<p>1</p> ｜ <div><A/><div> ｜ 这种情况 HostParent 就是 div
-
+	//parent Dom
 	const hostParent = getHostParent(finishedWork);
+
+	const sibling = getHostSibling(finishedWork);
+
 	if (hostParent != null) {
 		// 把当前fiber的dom 插入到 hostParent （注意当前 fiber 可能不是一个 HostComponent）（）
-		appendPlacementNodeIntoContainer(finishedWork, hostParent);
+		insertOrAppendPlacementNodeIntoContainer(finishedWork, hostParent, sibling);
 	}
 };
+
+function getHostSibling(fiber: FiberNode) {
+	let node: FiberNode = fiber;
+
+	findSibling: while (true) {
+		while (node.sibling === null) {
+			const parent = node.return;
+			if (
+				parent === null ||
+				parent.tag === HostComponent ||
+				parent.tag === HostRoot
+			) {
+				return null;
+			}
+			node = parent;
+		}
+		node.sibling.return = node.return;
+		node = node.sibling;
+
+		while (node.tag !== HostText && node.tag !== HostComponent) {
+			// 向下便利
+			if ((node.flags & Placement) != NoFlags) {
+				continue findSibling;
+			}
+			if (node.child === null) {
+				continue findSibling;
+			} else {
+				node.child.return = node;
+				node = node.child;
+			}
+		}
+		if ((node.flags & Placement) === NoFlags) {
+			return node.stateNode;
+		}
+	}
+}
 
 //获取当前fiber ,最近的HostComponent
 function getHostParent(fiber: FiberNode): Container | null {
@@ -172,23 +211,28 @@ function getHostParent(fiber: FiberNode): Container | null {
 	return null;
 }
 
-function appendPlacementNodeIntoContainer(
+function insertOrAppendPlacementNodeIntoContainer(
 	finishedWork: FiberNode,
-	hostParent: Container
+	hostParent: Container,
+	before?: Instance
 ) {
 	//当前fiberNode 为HostComponent或者 HostText 才能进行dom的插入
 	if (finishedWork.tag === HostComponent || finishedWork.tag === HostText) {
-		appendChildToContainer(hostParent, finishedWork.stateNode);
+		if (before) {
+			insertChildToContainer(finishedWork.stateNode, hostParent, before);
+		} else {
+			appendChildToContainer(hostParent, finishedWork.stateNode);
+		}
 		return;
 	}
 	const child = finishedWork.child;
 	if (child != null) {
 		//递归继续寻找
-		appendPlacementNodeIntoContainer(child, hostParent);
+		insertOrAppendPlacementNodeIntoContainer(child, hostParent);
 		//继续寻找兄弟节点
 		let sibling = child.sibling;
 		while (sibling != null) {
-			appendPlacementNodeIntoContainer(sibling, hostParent);
+			insertOrAppendPlacementNodeIntoContainer(sibling, hostParent);
 			sibling = sibling.sibling;
 		}
 	}

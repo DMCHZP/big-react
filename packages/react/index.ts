@@ -2,7 +2,10 @@ import currentDispathcer, {
 	Dispatcher,
 	resolveDispatcher
 } from './src/currentDispathcer';
-import { jsx, jsxDEV } from './src/jsx';
+import {
+	createElement as createElementFn,
+	isValidElement as isValidElementFn
+} from './src/jsx';
 
 export const useState: Dispatcher['useState'] = (initialState: any) => {
 	const dispatcher = resolveDispatcher();
@@ -15,9 +18,13 @@ export const __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = {
 };
 
 export const version = '0.0.0';
-//TODO 根据环境区分
-export const createElement = jsx;
-export { isValidElement } from './src/jsx';
+// //TODO 根据环境区分
+// export const createElement = jsx;
+// export { isValidElement } from './src/jsx';
+
+// TODO 根据环境区分使用jsx/jsxDEV
+export const createElement = createElementFn;
+export const isValidElement = isValidElementFn;
 
 // export default {
 // 	version: '0.0.0',

@@ -106,7 +106,7 @@ function appendAllChildren(parent: Instance, wip: FiberNode) {
 	}
 }
 
-//flags 冒泡，当前fiberNode 的 subtreeFlags 会包含它所有子节点的flags
+//flags 冒泡，当前fiberNode 的 subtreeFlags 会包含它所有子节点(仅第一代子节点)的flags
 function bubbleProperties(wip: FiberNode) {
 	let subtreeFlags = NoFlags;
 	let child = wip.child;
