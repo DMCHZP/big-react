@@ -7,6 +7,8 @@ import {
 	isValidElement as isValidElementFn
 } from './src/jsx';
 
+export { REACT_FRAGMENT_TYPE as Fragment } from 'shared/ReactSymbols';
+
 export const useState: Dispatcher['useState'] = (initialState: any) => {
 	const dispatcher = resolveDispatcher();
 	return dispatcher.useState(initialState);
