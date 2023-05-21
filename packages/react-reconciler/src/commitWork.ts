@@ -42,14 +42,14 @@ export const commitMutationEffects = (
 		) {
 			nextEffect = child;
 		} else {
-			while (nextEffect != null) {
+			up: while (nextEffect != null) {
 				//向下遍历到第一个没有subtreeFlags的fiber节点 ，然后执行effect
 				commitMutationEffectsOnFiber(nextEffect, root);
 				//指向兄弟节点，然后重复以上过程
 				const sibling: FiberNode | null = nextEffect.sibling;
 				if (sibling != null) {
 					nextEffect = sibling;
-					break;
+					break up;
 				}
 				//处理完之后向上遍历处理
 				nextEffect = nextEffect.return;

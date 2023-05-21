@@ -112,6 +112,7 @@ function App() {
 	return (
 		<div onClick={() => updateNum(num + 1)}>
 			{num === 0 ? <Child /> : 'noop'}
+			{num === 0 ? <Child2 /> : 'noop'}
 		</div>
 	);
 }
@@ -123,6 +124,14 @@ function Child() {
 	}, []);
 
 	return 'i am child';
+}
+function Child2() {
+	useEffect(() => {
+		console.log('Child2 mount');
+		return () => console.log('Child2 unmount');
+	}, []);
+
+	return 'i am child2';
 }
 
 const root = document.querySelector('#root');
