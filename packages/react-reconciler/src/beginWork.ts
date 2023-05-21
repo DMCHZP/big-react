@@ -10,21 +10,22 @@ import {
 } from './workTags';
 import { mountChildFiber, reconcilerChildFiber } from './childFibers';
 import { renderWithHooks } from './fiberHooks';
+import { Lane } from './fiberLanes';
 
 //递归中的递阶段
-export const beginWork = (wip: FiberNode) => {
+export const beginWork = (wip: FiberNode, renderLane: Lane) => {
 	//比较 react element 和 fiberNode，返回子fiberNode
 	switch (wip.tag) {
 		case HostRoot:
 			//1. 对于 根结点的fiberNode 要做两件事 1. 计算状态的最新值 2.创造子fiberNode
-			return updateHostRoot(wip);
+			return updateHostRoot(wip, renderLane);
 		case HostComponent:
 			//1.创造子fiberNode
 			return updateHostComponent(wip);
 		case HostText:
 			return null;
 		case FunctionComponent:
-			return updateFunctionComponent(wip);
+			return updateFunctionComponent(wip, renderLane);
 		case Fragment:
 			return updateFragment(wip);
 		default:
@@ -41,13 +42,13 @@ function updateFragment(wip: FiberNode) {
 	return wip.child;
 }
 
-function updateFunctionComponent(wip: FiberNode) {
-	const nextChildren = renderWithHooks(wip);
+function updateFunctionComponent(wip: FiberNode, renderLane: Lane) {
+	const nextChildren = renderWithHooks(wip, renderLane);
 	reconcileChildren(wip, nextChildren);
 	return wip.child;
 }
 
-function updateHostRoot(wip: FiberNode) {
+function updateHostRoot(wip: FiberNode, renderLane: Lane) {
 	const baseState = wip.memoizedState;
 	const updateQueue = wip.updateQueue as UpdateQueue<Element>;
 	const pending = updateQueue.shared.pending;
@@ -55,7 +56,7 @@ function updateHostRoot(wip: FiberNode) {
 	//对于根节点fiberNode 的 updateQueue.shared.pending; 是一个 reactElement
 
 	//就我们的应用是<div id="app"><App/></div>，hostRootFiber对应的是div，他的子元素对应的是App，但是App这个ReactElement被传给hostRootFiber作为memoizedState，hostRootFiber根据这个memoizedState来生成子FiberNode
-	const { memoizedState } = processUpdateQueue(baseState, pending);
+	const { memoizedState } = processUpdateQueue(baseState, pending, renderLane);
 	wip.memoizedState = memoizedState;
 	//这里 memoizedState 是一个 reactElement
 	const nextChildren = wip.memoizedState;

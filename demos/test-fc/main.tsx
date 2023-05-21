@@ -83,12 +83,15 @@ const App = () => {
 	return (
 		<ul
 			onClickCapture={() => {
-				setNum(num + 1);
+				setNum((num) => num + 1);
+				setNum((num) => num + 1);
+				setNum((num) => num + 1);
 			}}
 		>
-			<li>3</li>
+			{/* <li>3</li>
 			<li>4</li>
-			{arr}
+			{arr} */}
+			{num}
 		</ul>
 	);
 };
