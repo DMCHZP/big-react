@@ -8,6 +8,7 @@ import {
 import { Flags, NoFlags } from './fiberFlags';
 import { Container } from 'hostConfig';
 import { Lane, Lanes, NoLane, NoLanes } from './fiberLanes';
+import { Effect } from './fiberHooks';
 
 export class FiberNode {
 	type: any;
@@ -60,6 +61,11 @@ export class FiberNode {
 	}
 }
 
+export interface PendingPassiveEffect {
+	unmount: Effect[];
+	update: Effect[];
+}
+
 // 根结点的 FiberNode 原生dom 对象
 export class FiberRootNode {
 	container: Container;
@@ -67,6 +73,7 @@ export class FiberRootNode {
 	finishWorked: FiberNode | null;
 	pendingLanes: Lanes;
 	finishedLane: Lane;
+	pendingPassiveEffects: PendingPassiveEffect;
 	constructor(container: Container, hostRootFiber: FiberNode) {
 		this.container = container;
 		//FiberRootNode 的 current 指向 hostRootFiber (跟节点的 fiberNode 对象)
@@ -76,6 +83,11 @@ export class FiberRootNode {
 		this.finishWorked = null;
 		this.pendingLanes = NoLanes;
 		this.finishedLane = NoLane;
+
+		this.pendingPassiveEffects = {
+			unmount: [],
+			update: []
+		};
 	}
 }
 
